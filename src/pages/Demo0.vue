@@ -89,7 +89,7 @@ function initScene() {
   scene.fog = new THREE.Fog(0x0a1220, 30, 120)
 
   camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 500)
-  camera.position.set(10, 25, 35)
+  camera.position.set(15, 30, 35)
   camera.lookAt(0, 0, 0)
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
@@ -109,13 +109,16 @@ function initScene() {
 
   // 光照
   // 强光照让凹凸纹理可见
-  scene.add(new THREE.AmbientLight(0x8899aa, 2))
-  const keyLight = new THREE.DirectionalLight(0xffffff, 4)
-  keyLight.position.set(-20, 15, 40)
+  scene.add(new THREE.AmbientLight(0x667788, 1.5))
+  const keyLight = new THREE.DirectionalLight(0xffffff, 6)
+  keyLight.position.set(-25, 20, 45)
   scene.add(keyLight)
-  const fillLight = new THREE.DirectionalLight(0x4488cc, 2)
-  fillLight.position.set(30, -5, 10)
+  const fillLight = new THREE.DirectionalLight(0x4488cc, 3)
+  fillLight.position.set(35, -10, 15)
   scene.add(fillLight)
+  const rimLight = new THREE.DirectionalLight(0x88aacc, 2)
+  rimLight.position.set(0, -30, 0)
+  scene.add(rimLight)
 
   // 网格参考面
   const grid = new THREE.GridHelper(80, 40, 0x334455, 0x1a2a3a)
@@ -189,12 +192,12 @@ function buildBaseMap() {
 
   for (const reg of regions) {
     for (const shape of reg.shapes) {
-      const geom = new THREE.ExtrudeGeometry(shape, { depth: 1.5, bevelEnabled: true, bevelThickness: 0.3, bevelSize: 0.2, bevelSegments: 3 })
+      const geom = new THREE.ExtrudeGeometry(shape, { depth: 3, bevelEnabled: true, bevelThickness: 0.5, bevelSize: 0.3, bevelSegments: 3 })
       const mat = new THREE.MeshPhongMaterial({
         map: tex,
         normalMap: normalTex,
         displacementMap: dispTex,
-        displacementScale: 0.5,
+        displacementScale: 1.0,
         color: 0x6688aa,
         emissive: 0x112233,
         specular: 0x334455,
