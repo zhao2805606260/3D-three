@@ -84,11 +84,11 @@ function initScene() {
   const { width, height } = canvas.parentElement!.getBoundingClientRect()
 
   scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x070b14)
-  scene.fog = new THREE.Fog(0x070b14, 30, 80)
+  scene.background = new THREE.Color(0x0a1220)
+  scene.fog = new THREE.Fog(0x0a1220, 30, 120)
 
   camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 200)
-  camera.position.set(0, 60, 80)
+  camera.position.set(10, 40, 50)
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
   renderer.setSize(width, height)
@@ -103,10 +103,18 @@ function initScene() {
   controls.target.set(0, 0, 0)
 
   // 光照
-  scene.add(new THREE.AmbientLight(0x404060, 1.5))
-  const dir = new THREE.DirectionalLight(0x64ffda, 2)
+  scene.add(new THREE.AmbientLight(0x6080a0, 3))
+  const dir = new THREE.DirectionalLight(0xaaddff, 4)
   dir.position.set(30, 50, 30)
   scene.add(dir)
+  const dir2 = new THREE.DirectionalLight(0xffaa88, 2)
+  dir2.position.set(-20, 20, -20)
+  scene.add(dir2)
+
+  // 网格参考面
+  const grid = new THREE.GridHelper(80, 40, 0x334455, 0x1a2a3a)
+  grid.position.y = -5
+  scene.add(grid)
 
   mapGroup = new THREE.Group()
   mapGroup.rotation.x = -Math.PI / 2
@@ -117,7 +125,7 @@ function initScene() {
   scene.add(flyLineGroup)
 
   // 相机入场动画
-  gsap.fromTo(camera.position, { x: -30, y: 80, z: 120 }, { x: 0, y: 60, z: 80, duration: 2, ease: 'power3.out' })
+  gsap.fromTo(camera.position, { x: -30, y: 60, z: 80 }, { x: 10, y: 40, z: 50, duration: 2, ease: 'power3.out' })
 
   buildBaseMap()
   buildOutline()
@@ -175,10 +183,12 @@ function buildBaseMap() {
         normalMap: normalTex,
         displacementMap: dispTex,
         displacementScale: 0.1,
-        metalness: 0.3,
-        roughness: 0.6,
+        metalness: 0.1,
+        roughness: 0.4,
         side: THREE.DoubleSide,
-        color: 0x2a4a5a,
+        color: 0x3a5a6a,
+        emissive: 0x1a2a3a,
+        emissiveIntensity: 0.3,
       })
       const mesh = new THREE.Mesh(geom, mat)
       mesh.position.z = 0.25
