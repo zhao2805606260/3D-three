@@ -74,7 +74,7 @@ function initScene(){
   mapGroup=new THREE.Group();mapGroup.rotation.x=-Math.PI/2;scene.add(mapGroup)
   flyGroup=new THREE.Group();flyGroup.rotation.x=-Math.PI/2;scene.add(flyGroup)
   gsap.fromTo(camera.position,{x:-35,y:50,z:70},{x:20,y:32,z:38,duration:2.5,ease:'power3.out'})
-  buildMap();buildOutline();buildFly();buildStars();initCharts();animate()
+  buildMap();buildOutline();buildFly();buildStars();setTimeout(initCharts,500);animate()
 }
 
 function buildMap(){
