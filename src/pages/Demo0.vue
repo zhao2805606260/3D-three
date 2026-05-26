@@ -52,9 +52,6 @@ import scOutlineData from '../assets/sc_outline.json'
 import textureMap from '../assets/sc_map.png'
 import scNormalMap from '../assets/sc_normal_map.png'
 import scDisplacementMap from '../assets/sc_displacement_map.png'
-import textureMap from '../assets/sc_map.png'
-import scNormalMap from '../assets/sc_normal_map.png'
-import scDisplacementMap from '../assets/sc_displacement_map.png'
 
 const canvasRef = ref<HTMLCanvasElement>()
 const chart1Ref = ref<HTMLDivElement>()
