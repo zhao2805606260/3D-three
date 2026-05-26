@@ -52,6 +52,9 @@ import scOutlineData from '../assets/sc_outline.json'
 import textureMap from '../assets/sc_map.png'
 import scNormalMap from '../assets/sc_normal_map.png'
 import scDisplacementMap from '../assets/sc_displacement_map.png'
+import textureMap from '../assets/sc_map.png'
+import scNormalMap from '../assets/sc_normal_map.png'
+import scDisplacementMap from '../assets/sc_displacement_map.png'
 
 const canvasRef = ref<HTMLCanvasElement>()
 const chart1Ref = ref<HTMLDivElement>()
@@ -89,12 +92,15 @@ function initScene() {
   scene.fog = new THREE.Fog(0x0a1220, 30, 120)
 
   camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 500)
-  camera.position.set(5, 30, 35)
+  camera.position.set(10, 25, 35)
   camera.lookAt(0, 0, 0)
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
   renderer.setSize(width, height)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  renderer.shadowMap.enabled = true
+  renderer.toneMapping = THREE.ACESFilmicToneMapping
+  renderer.toneMappingExposure = 1.2
 
   controls = new OrbitControls(camera, renderer.domElement)
   controls.enableDamping = true
@@ -105,8 +111,14 @@ function initScene() {
   controls.target.set(0, 0, 0)
 
   // 光照
-  scene.add(new THREE.AmbientLight(0x406080, 4))
-  scene.add(new THREE.DirectionalLight(0x88bbff, 5))
+  // 强光照让凹凸纹理可见
+  scene.add(new THREE.AmbientLight(0x8899aa, 2))
+  const keyLight = new THREE.DirectionalLight(0xffffff, 4)
+  keyLight.position.set(-20, 15, 40)
+  scene.add(keyLight)
+  const fillLight = new THREE.DirectionalLight(0x4488cc, 2)
+  fillLight.position.set(30, -5, 10)
+  scene.add(fillLight)
 
   // 网格参考面
   const grid = new THREE.GridHelper(80, 40, 0x334455, 0x1a2a3a)
@@ -122,7 +134,7 @@ function initScene() {
   scene.add(flyLineGroup)
 
   // 相机入场动画
-  gsap.fromTo(camera.position, { x: -20, y: 40, z: 60 }, { x: 5, y: 30, z: 35, duration: 2, ease: 'power3.out' })
+  gsap.fromTo(camera.position, { x: -30, y: 40, z: 60 }, { x: 10, y: 25, z: 35, duration: 2, ease: 'power3.out' })
 
   buildBaseMap()
   buildOutline()
@@ -170,20 +182,31 @@ function buildBaseMap() {
   // const tex = textureLoader.load(textureMap)
   // tex.wrapS = tex.wrapT = THREE.RepeatWrapping
 
+  // 加载纹理
+  const tex = textureLoader.load(textureMap)
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping
+  const normalTex = textureLoader.load(scNormalMap)
+  normalTex.wrapS = normalTex.wrapT = THREE.RepeatWrapping
+  const dispTex = textureLoader.load(scDisplacementMap)
+  dispTex.wrapS = dispTex.wrapT = THREE.RepeatWrapping
+
   for (const reg of regions) {
     for (const shape of reg.shapes) {
-      const geom = new THREE.ShapeGeometry(shape)
+      const geom = new THREE.ExtrudeGeometry(shape, { depth: 1.5, bevelEnabled: true, bevelThickness: 0.3, bevelSize: 0.2, bevelSegments: 3 })
       const mat = new THREE.MeshPhongMaterial({
-        color: 0x1a4060,
-        emissive: 0x0a2030,
-        specular: 0x4488aa,
-        shininess: 30,
+        map: tex,
+        normalMap: normalTex,
+        displacementMap: dispTex,
+        displacementScale: 0.5,
+        color: 0x6688aa,
+        emissive: 0x112233,
+        specular: 0x334455,
+        shininess: 20,
         side: THREE.DoubleSide,
-        flatShading: false,
       })
       const mesh = new THREE.Mesh(geom, mat)
-      mesh.position.z = 2
-      mesh.renderOrder = 1
+      mesh.position.z = 0.01
+      mesh.renderOrder = 0
       mapGroup.add(mesh)
     }
 
