@@ -68,9 +68,10 @@ let animId = 0
 let charts: echarts.ECharts[] = []
 const textureLoader = new THREE.TextureLoader()
 
-// ========== d3 投影 ==========
+// ========== d3 投影（省份级缩放） ==========
 const projection = geoMercator()
   .center((scMapData as any).features[0].properties.centroid || [104, 30.5])
+  .scale(8000)
   .translate([0, 0])
 
 function proj(coord: [number, number]): [number, number] {
