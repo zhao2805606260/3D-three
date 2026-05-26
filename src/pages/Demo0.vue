@@ -71,7 +71,7 @@ const textureLoader = new THREE.TextureLoader()
 // ========== d3 投影（省份级缩放） ==========
 const projection = geoMercator()
   .center((scMapData as any).features[0].properties.centroid || [104, 30.5])
-  .scale(8000)
+  .scale(600)
   .translate([0, 0])
 
 function proj(coord: [number, number]): [number, number] {
@@ -88,8 +88,9 @@ function initScene() {
   scene.background = new THREE.Color(0x0a1220)
   scene.fog = new THREE.Fog(0x0a1220, 30, 120)
 
-  camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 200)
-  camera.position.set(10, 40, 50)
+  camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 500)
+  camera.position.set(5, 30, 35)
+  camera.lookAt(0, 0, 0)
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
   renderer.setSize(width, height)
@@ -134,7 +135,7 @@ function initScene() {
   scene.add(flyLineGroup)
 
   // 相机入场动画
-  gsap.fromTo(camera.position, { x: -30, y: 60, z: 80 }, { x: 10, y: 40, z: 50, duration: 2, ease: 'power3.out' })
+  gsap.fromTo(camera.position, { x: -20, y: 40, z: 60 }, { x: 5, y: 30, z: 35, duration: 2, ease: 'power3.out' })
 
   buildBaseMap()
   buildOutline()
