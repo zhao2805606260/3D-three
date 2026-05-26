@@ -135,18 +135,23 @@ function buildBaseMap() {
 
   const bbox = new THREE.Box2()
   for (const feature of data.features) {
+    if (!feature.geometry || !feature.geometry.coordinates) continue
     const shapes: THREE.Shape[] = []
     const coords = feature.geometry.coordinates
     for (const poly of coords) {
+      if (!poly) continue
       for (const ring of poly) {
-        const shape = new THREE.Shape()
-        ring.forEach((c: number[], i: number) => {
-          const [x, y] = proj(c as [number, number])
-          if (i === 0) shape.moveTo(x, y)
-          else shape.lineTo(x, y)
-          bbox.expandByPoint(new THREE.Vector2(x, y))
-        })
-        shapes.push(shape)
+        if (!ring || ring.length < 3) continue
+        try {
+          const shape = new THREE.Shape()
+          ring.forEach((c: number[], i: number) => {
+            const [x, y] = proj(c as [number, number])
+            if (i === 0) shape.moveTo(x, y)
+            else shape.lineTo(x, y)
+            bbox.expandByPoint(new THREE.Vector2(x, y))
+          })
+          shapes.push(shape)
+        } catch (e) { /* skip invalid ring */ }
       }
     }
     const center = proj(feature.properties.centroid || feature.properties.center || [104, 30])
@@ -209,19 +214,25 @@ function makeTextSprite(text: string) {
 function buildOutline() {
   const data = scOutlineData as any
   for (const feature of data.features) {
-    const coords = feature.geometry.coordinates[0]
-    const pts = coords.map((c: number[]) => {
-      const [x, y] = proj(c as [number, number])
-      return new THREE.Vector3(x, y, 0.55)
-    })
+    for (const ring of feature.geometry.coordinates) {
+      if (!ring || ring.length < 2) continue
+      const pts = ring.map((c: number[]) => {
+        const [x, y] = proj(c as [number, number])
+        return new THREE.Vector3(x, y, 0.55)
+      })
+      if (pts.length < 2) continue
 
-    const curve = new THREE.CatmullRomCurve3(pts)
-    const points = curve.getSpacedPoints(300)
-
-    const geom = new THREE.BufferGeometry().setFromPoints(points)
-    const mat = new THREE.LineBasicMaterial({ color: 0x64ffda, linewidth: 1, transparent: true, opacity: 0.7 })
-    const line = new THREE.Line(geom, mat)
-    mapGroup.add(line)
+      try {
+        const curve = new THREE.CatmullRomCurve3(pts)
+        const points = curve.getSpacedPoints(200)
+        const geom = new THREE.BufferGeometry().setFromPoints(points)
+        const mat = new THREE.LineBasicMaterial({ color: 0x64ffda, linewidth: 1, transparent: true, opacity: 0.7 })
+        const line = new THREE.Line(geom, mat)
+        mapGroup.add(line)
+      } catch (e) {
+        // 跳过无法生成曲线的路径
+      }
+    }
   }
 }
 
@@ -232,6 +243,7 @@ function buildFlyLines() {
 
   for (const feature of outline.features) {
     for (const ring of feature.geometry.coordinates) {
+      if (!ring || ring.length < 2) continue
       for (const c of ring) {
         const [x, y] = proj(c as [number, number])
         allPts.push(new THREE.Vector3(x, y, 0.6))
@@ -239,15 +251,20 @@ function buildFlyLines() {
     }
   }
 
+  if (allPts.length < 10) return
+
   const mainCurve = new THREE.CatmullRomCurve3(allPts)
-  const spaced = mainCurve.getSpacedPoints(800)
+  const spaced = mainCurve.getSpacedPoints(Math.min(800, allPts.length))
 
   // 多段飞线
   for (let k = 0; k < 6; k++) {
-    const start = Math.floor(Math.random() * (spaced.length - 40))
-    const seg = spaced.slice(start, start + 40)
+    const segLen = Math.min(40, Math.floor(spaced.length / 3))
+    const start = Math.floor(Math.random() * Math.max(1, spaced.length - segLen))
+    const seg = spaced.slice(start, start + segLen)
+    if (seg.length < 2) continue
+
     const curve = new THREE.CatmullRomCurve3(seg)
-    const pts = curve.getSpacedPoints(100)
+    const pts = curve.getSpacedPoints(50)
 
     const geom = new THREE.BufferGeometry().setFromPoints(pts)
     const sizes = new Float32Array(pts.length)
@@ -341,14 +358,16 @@ function animate() {
   // 飞线动画
   for (const child of flyLineGroup.children) {
     if (child instanceof THREE.Points && child.userData.curve) {
-      const { curve, speed, offset } = child.userData
-      const t = ((performance.now() * 0.001 * speed + offset) % 100) / 100
-      const pt = curve.getPointAt(t)
-      child.position.copy(pt)
-
-      // 渐隐渐现
-      const op = Math.sin(t * Math.PI)
-      ;(child.material as THREE.PointsMaterial).opacity = op * 0.8 + 0.2
+      try {
+        const { curve, speed, offset } = child.userData
+        const t = ((performance.now() * 0.001 * speed + offset) % 100) / 100
+        const pt = curve.getPointAt(t)
+        if (pt) {
+          child.position.copy(pt)
+          const op = Math.sin(t * Math.PI)
+          ;(child.material as THREE.PointsMaterial).opacity = op * 0.8 + 0.2
+        }
+      } catch (e) { /* skip */ }
     }
   }
 
