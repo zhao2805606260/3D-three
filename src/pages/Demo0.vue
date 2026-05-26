@@ -105,26 +105,13 @@ function initScene() {
   controls.target.set(0, 0, 0)
 
   // 光照
-  scene.add(new THREE.AmbientLight(0x6080a0, 3))
-  const dir = new THREE.DirectionalLight(0xaaddff, 4)
-  dir.position.set(30, 50, 30)
-  scene.add(dir)
-  const dir2 = new THREE.DirectionalLight(0xffaa88, 2)
-  dir2.position.set(-20, 20, -20)
-  scene.add(dir2)
+  scene.add(new THREE.AmbientLight(0x406080, 4))
+  scene.add(new THREE.DirectionalLight(0x88bbff, 5))
 
   // 网格参考面
   const grid = new THREE.GridHelper(80, 40, 0x334455, 0x1a2a3a)
   grid.position.y = -5
   scene.add(grid)
-
-  // 调试：原点红色球
-  const testSphere = new THREE.Mesh(
-    new THREE.SphereGeometry(3, 32, 32),
-    new THREE.MeshBasicMaterial({ color: 0xff0000 })
-  )
-  testSphere.position.set(0, 5, 0)
-  scene.add(testSphere)
 
   mapGroup = new THREE.Group()
   mapGroup.rotation.x = -Math.PI / 2
@@ -186,14 +173,17 @@ function buildBaseMap() {
   for (const reg of regions) {
     for (const shape of reg.shapes) {
       const geom = new THREE.ShapeGeometry(shape)
-      const mat = new THREE.MeshBasicMaterial({
-        color: 0x3a6a8a,
+      const mat = new THREE.MeshPhongMaterial({
+        color: 0x1a4060,
+        emissive: 0x0a2030,
+        specular: 0x4488aa,
+        shininess: 30,
         side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.8,
+        flatShading: false,
       })
       const mesh = new THREE.Mesh(geom, mat)
-      mesh.position.z = 0.3
+      mesh.position.z = 2
+      mesh.renderOrder = 1
       mapGroup.add(mesh)
     }
 
