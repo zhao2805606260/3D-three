@@ -1,8 +1,8 @@
-# 🗺️ SC-DATAV-Vue
+# 🗺️ 
 
-**四川大屏数据可视化 — Vue3 + TypeScript + Three.js / TresJS 重构版**
+**四川大屏数据可视化 — Vue3 + TypeScript + Three.js / TresJS **
 
-原项目 [sc-datav](https://github.com/knight-L/sc-datav) 是基于 React Three Fiber 的 3D 大屏可视化项目。本项目将其完整重构为 Vue3 技术栈。
+本项目使用 Vue3 技术栈。
 
 ## 🛠️ 技术栈
 
@@ -53,9 +53,7 @@ src/
 └── assets/          # 静态资源
 ```
 
-## 🙏 致谢
 
-原项目作者：[knight-L](https://github.com/knight-L) — [sc-datav](https://github.com/knight-L/sc-datav)
 
 ## 📝 License
 
