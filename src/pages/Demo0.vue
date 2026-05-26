@@ -116,6 +116,14 @@ function initScene() {
   grid.position.y = -5
   scene.add(grid)
 
+  // 调试：原点红色球
+  const testSphere = new THREE.Mesh(
+    new THREE.SphereGeometry(3, 32, 32),
+    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+  )
+  testSphere.position.set(0, 5, 0)
+  scene.add(testSphere)
+
   mapGroup = new THREE.Group()
   mapGroup.rotation.x = -Math.PI / 2
   scene.add(mapGroup)
@@ -131,6 +139,7 @@ function initScene() {
   buildOutline()
   buildFlyLines()
   buildParticles()
+  console.log('Scene children:', scene.children.length, 'Map children:', mapGroup.children.length, 'FlyLine children:', flyLineGroup.children.length)
   initCharts()
 
   animate()
@@ -166,32 +175,23 @@ function buildBaseMap() {
     regions.push({ name: feature.properties.name, center, shapes })
   }
   entityCount.value = regions.length
+  console.log('Map regions:', regions.length, 'bbox:', bbox.min.toArray(), bbox.max.toArray())
 
-  // 加载纹理
-  const tex = textureLoader.load(textureMap)
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping
-  const normalTex = textureLoader.load(scNormalMap)
-  normalTex.wrapS = normalTex.wrapT = THREE.RepeatWrapping
-  const dispTex = textureLoader.load(scDisplacementMap)
-  dispTex.wrapS = dispTex.wrapT = THREE.RepeatWrapping
+  // 加载纹理（后面用）
+  // const tex = textureLoader.load(textureMap)
+  // tex.wrapS = tex.wrapT = THREE.RepeatWrapping
 
   for (const reg of regions) {
     for (const shape of reg.shapes) {
-      const geom = new THREE.ExtrudeGeometry(shape, { depth: 0.3, bevelEnabled: false })
-      const mat = new THREE.MeshStandardMaterial({
-        map: tex,
-        normalMap: normalTex,
-        displacementMap: dispTex,
-        displacementScale: 0.1,
-        metalness: 0.1,
-        roughness: 0.4,
+      const geom = new THREE.ShapeGeometry(shape)
+      const mat = new THREE.MeshBasicMaterial({
+        color: 0x3a6a8a,
         side: THREE.DoubleSide,
-        color: 0x3a5a6a,
-        emissive: 0x1a2a3a,
-        emissiveIntensity: 0.3,
+        transparent: true,
+        opacity: 0.8,
       })
       const mesh = new THREE.Mesh(geom, mat)
-      mesh.position.z = 0.25
+      mesh.position.z = 0.3
       mapGroup.add(mesh)
     }
 
